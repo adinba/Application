@@ -2,7 +2,7 @@ numpy
 pandas
 streamlit
 streamlit_cropper
-opencv-python
-tensorflow
+opencv-python-headless
+tensorflow-cpu
 sklearn
 keras
