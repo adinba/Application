@@ -5,5 +5,5 @@ streamlit_cropper
 opencv-python
 tensorflow
 sklearn
-PIL
+pil
 keras
