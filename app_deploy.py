@@ -6,15 +6,9 @@ import cv2
 import pandas as pd
 import keras
 import tensorflow as tf
-from keras.applications.vgg16 import preprocess_input
-from tensorflow.keras.applications.vgg16 import VGG16
 from sklearn.cluster import DBSCAN 
 
-model_base = VGG16(weights='imagenet',input_shape=(224,224,3))
-vgg16 = keras.Model(inputs=model_base.input,outputs=model_base.get_layer('fc1').output)
-
 model = tf.keras.models.load_model('./model.hd5')
-
 
 liste_h = ['N15',
  'H6',
