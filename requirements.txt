@@ -3,6 +3,6 @@ pandas
 streamlit
 streamlit_cropper
 opencv-python-headless
-tensorflow
+tensorflow-cpu
 sklearn
 keras
