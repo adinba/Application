@@ -4,30 +4,20 @@ from PIL import Image
 import numpy as np
 import cv2
 import pandas as pd
-import time
 import keras
 import tensorflow as tf
 from keras.applications.vgg16 import preprocess_input
-from keras.preprocessing import image
-from glob import glob
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.vgg16 import VGG16
-from tensorflow.keras.applications.vgg16 import preprocess_input
-from scipy.spatial import distance, distance_matrix
 from sklearn.cluster import DBSCAN
-from sklearn import metrics
-from sklearn.datasets import make_blobs
-from sklearn.preprocessing import StandardScaler
+import pickle
 
+def importation_model_et_label(repertoire):
+    model = tf.keras.models.load_model(repertoire + '/model.hd5')
+    labels = []
+    with open (repertoire + '/labels', 'rb') as temp:
+        labels = pickle.load(temp)
+    return model,labels
 
-model_base = VGG16(weights='imagenet',input_shape=(224,224,3))
-vgg16 = keras.Model(inputs=model_base.input,outputs=model_base.get_layer('fc1').output)
-
-model = tf.keras.models.load_model('./model.hd5')
-
-liste_h = glob('/home/adin/images/*/')
-for i in range(len(liste_h)):
-    liste_h[i] = str.split(liste_h[i],"/")[-2]
+model,liste_h= importation_model_et_label("./model")
 
 
 st.set_page_config(page_title="Hyéroglyfes recognition and translation App",page_icon="⚕️",layout="centered",initial_sidebar_state="expanded")
@@ -235,8 +225,9 @@ if img_file:
             encode.append(encodage(liste_colonne_elem[k]))
             
         manuel_de_codage = [""] * len(encode)
+        st.header("Décodage complet, possibilité de corriegr directement les erreurs içi :")
         for k in range(len(encode)):
-            manuel_de_codage[k] = st.text_area("Modifier à la main les erreurs manifeste ", value=encode[k], height=None, max_chars=None)
+            manuel_de_codage[k] = st.text_area("Colonne " + str(k), value=encode[k], height=None, max_chars=None)
             
         sauver_texte = st.button("Sauver l'encodage dans un fichier texte")
         
@@ -257,19 +248,27 @@ if img_file:
             img = st.sidebar.image(symbole)
             
             
-            
             symbole = np.array(symbole)
-            symbole = cv2.resize(symbole, (224,224),interpolation=cv2.INTER_AREA)
-            img_data = np.expand_dims(symbole, axis=0)
+            img_data = cv2.resize(symbole, (100,100),interpolation=cv2.INTER_AREA)
+            
+
+            img_data = np.expand_dims(img_data,axis=-1)
+            img_data = np.concatenate((img_data,img_data,img_data),axis= -1)
+            img_data = np.expand_dims(img_data,axis=0)
+
             img_data = preprocess_input(img_data)
-            img_data = np.concatenate((img_data,img_data,img_data), axis=0)
-            img_data = np.expand_dims(img_data, axis=-1)
-            img_data = img_data.transpose()
-            vgg16_feature = vgg16.predict(img_data)
-            features_1 = np.ravel(vgg16_feature)
+            
+            vecteur = model.predict(img_data)
+            
+            symbole_reconnus = liste_h[np.argmax(vecteur)]
+            probabilite = vecteur[:,np.argmax(vecteur)]
+            numero_du_symbole_reconnus = np.argmax(vecteur)
             
             array = np.array(cropped_img)
             stock_cropped.empty()
+            
+            
+            st.sidebar.write("Ce symbole a était identifié comme le symbole : " + symbole_reconnus)
             
             try:
                 gray = cv2.cvtColor(array, cv2.COLOR_BGR2GRAY)
@@ -297,28 +296,32 @@ if img_file:
                     componentMask = componentMask[y:(y+h),x:(x+w)]
                     componentMask = cv2.bitwise_not(componentMask)
                     
-                    img_temp = cv2.resize(componentMask, (224,224),interpolation=cv2.INTER_AREA)
-                    img_tmp = np.expand_dims(img_temp, axis=2)
-                    img_tmp = np.concatenate((img_tmp,img_tmp,img_tmp), axis=2)
-                    img_data = np.expand_dims(img_tmp, axis=0)
+                    img_temp = cv2.resize(componentMask, (100,100),interpolation=cv2.INTER_AREA)
+                    
+                    img_data = np.expand_dims(img_temp,axis=-1)
+                    img_data = np.concatenate((img_data,img_data,img_data),axis= -1)
+                    img_data = np.expand_dims(img_data,axis=0)
+
                     img_data = preprocess_input(img_data)
-                    vgg16_feature = vgg16.predict(img_data,verbose=0)
-                    features_temp = np.ravel(vgg16_feature)
-                    d = distance.euclidean(features_1,features_temp)
-                    element.append({"x":x,"y":y,"w":w,"h":h,"d":d})
+                
+                    vecteur = model.predict(img_data)
+                    
+                    proba = vecteur[:,numero_du_symbole_reconnus]
+                    
+                    
+                    element.append({"x":x,"y":y,"w":w,"h":h,"d":proba})
                     
             
             
-            distance_max = st.slider("Les éléments possèdant une distance inférieure a :", min_value=1, max_value=500, value=135, step=1)
+            proba_max = st.slider("Les éléments possèdant une distance inférieure a :", min_value=0.00, max_value=1.00, value=0.5, step=0.01)
             
             for i in range(len(element)):
-                if element[i]["d"] < distance_max:
+                if element[i]["d"] > proba_max:
                     cv2.rectangle(array, (element[i]["x"], element[i]["y"]), (element[i]["x"] + element[i]["w"], element[i]["y"] + element[i]["h"]), col, 2)
-            
+                    
             stock_cropped.empty()
             array = cv2.resize(array, (1500,1000),interpolation=cv2.INTER_AREA)
             st.image(array, caption='')
-        
         
     if option_choice == "Traduction":
         array = np.array(cropped_img)
