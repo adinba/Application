@@ -5,4 +5,4 @@ streamlit_cropper
 opencv-python
 keras
 tensorflow
-sklearn.cluster
+sklearn
