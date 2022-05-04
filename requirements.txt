@@ -5,6 +5,4 @@ streamlit_cropper
 opencv-python
 keras
 tensorflow
-keras.applications.vgg16
-tensorflow.keras.applications.vgg16
 sklearn.cluster
