@@ -1,2 +1,11 @@
 numpy
 pandas
+streamlit
+streamlit_cropper
+PIL
+cv2
+keras
+tensorflow
+keras.applications.vgg16
+tensorflow.keras.applications.vgg16
+sklearn.cluster
