@@ -3,6 +3,8 @@ pandas
 streamlit
 streamlit_cropper
 opencv-python
-keras
 tensorflow
 sklearn
+pickle
+PIL
+keras
