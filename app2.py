@@ -4,9 +4,7 @@ from PIL import Image
 import numpy as np
 import cv2
 import pandas as pd
-import keras
 import tensorflow as tf
-from keras.applications.vgg16 import preprocess_input
 from sklearn.cluster import DBSCAN
 import pickle
 
@@ -132,7 +130,7 @@ if img_file:
 
         # Clustering
         frame = np.array(frame)
-        db = DBSCAN(eps=25, min_samples=4).fit(frame)
+        db = DBSCAN(eps=20, min_samples=4).fit(frame)
         labels = db.labels_
 
         # Data frame résultant
@@ -180,7 +178,6 @@ if img_file:
                     temp = img[y:(y+h),x:(x+w)] 
                     temp = cv2.resize(temp, (100,100),interpolation=cv2.INTER_AREA)
                     img_data = np.expand_dims(temp, axis=0)
-                    img_data = preprocess_input(img_data)
                     vecteur = model.predict(img_data)
                     res = liste_h[np.argmax(vecteur)]
                     elements.append({"area":area,"x":x,"y":y,"w":w,"h":h,"cX":cX,"cY":cY,"groupe":groupe,"pred":res})
@@ -225,7 +222,10 @@ if img_file:
             encode.append(encodage(liste_colonne_elem[k]))
             
         manuel_de_codage = [""] * len(encode)
-        st.header("Décodage complet, possibilité de corriegr directement les erreurs içi :")
+        st.header("Décodage complet ...")
+        st.write("Possibilité de corriger directement les erreurs içi :")
+        
+        
         for k in range(len(encode)):
             manuel_de_codage[k] = st.text_area("Colonne " + str(k), value=encode[k], height=None, max_chars=None)
             
@@ -239,8 +239,11 @@ if img_file:
             
     if option_choice == "Reconnaissance":
         message = st.write("Entrez un symbole")
-        symbole = st.sidebar.selectbox(label="Liste des symboles", options=["A1", "A2", "A3", "A4", "A5"])
+        
+        symbole = st.sidebar.selectbox(label="Liste des symboles", options=liste_h)
+
         img_symbole = st.sidebar.file_uploader(label='Charger un symbole içi', type=['png', 'jpg'])
+        
         if img_symbole:
 #            message.empty()
             symbole = Image.open(img_symbole)
@@ -255,79 +258,76 @@ if img_file:
             img_data = np.expand_dims(img_data,axis=-1)
             img_data = np.concatenate((img_data,img_data,img_data),axis= -1)
             img_data = np.expand_dims(img_data,axis=0)
-
-            img_data = preprocess_input(img_data)
             
             vecteur = model.predict(img_data)
             
             symbole_reconnus = liste_h[np.argmax(vecteur)]
             probabilite = vecteur[:,np.argmax(vecteur)]
             numero_du_symbole_reconnus = np.argmax(vecteur)
-            
-            array = np.array(cropped_img)
-            stock_cropped.empty()
-            
-            
+
             st.sidebar.write("Ce symbole a était identifié comme le symbole : " + symbole_reconnus)
             
-            try:
-                gray = cv2.cvtColor(array, cv2.COLOR_BGR2GRAY)
-            except:
-                gray = array
-            thresh = cv2.threshold(gray, 0, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-              
-            output = cv2.connectedComponentsWithStats(thresh, 4, cv2.CV_32S)
-            (numLabels, labels, stats, centroids) = output
+        else:
+            numero_du_symbole_reconnus = liste_h.index(symbole)
             
-            element = []
-            for i in range(0, numLabels):
-                x = stats[i, cv2.CC_STAT_LEFT]
-                y = stats[i, cv2.CC_STAT_TOP]
-                w = stats[i, cv2.CC_STAT_WIDTH]
-                h = stats[i, cv2.CC_STAT_HEIGHT]
-                area = stats[i, cv2.CC_STAT_AREA]
+        print(numero_du_symbole_reconnus)
+        array = np.array(cropped_img)
+        stock_cropped.empty()
+            
 
-                Keep_area = area < 30000 and area > 10
-                Keep_w_h = w <80 and h <80 and w > 3 and h> 3
+        try:
+            gray = cv2.cvtColor(array, cv2.COLOR_BGR2GRAY)
+        except:
+            gray = array
+        thresh = cv2.threshold(gray, 0, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+              
+        output = cv2.connectedComponentsWithStats(thresh, 4, cv2.CV_32S)
+        (numLabels, labels, stats, centroids) = output
+            
+        element = []
+        for i in range(0, numLabels):
+            x = stats[i, cv2.CC_STAT_LEFT]
+            y = stats[i, cv2.CC_STAT_TOP]
+            w = stats[i, cv2.CC_STAT_WIDTH]
+            h = stats[i, cv2.CC_STAT_HEIGHT]
+            area = stats[i, cv2.CC_STAT_AREA]
+
+            Keep_area = area < 30000 and area > 10
+            Keep_w_h = w <80 and h <80 and w > 3 and h> 3
                 
  
-                if all((Keep_area,Keep_w_h)):
-                    componentMask = (labels == i).astype("uint8") * 255
-                    componentMask = componentMask[y:(y+h),x:(x+w)]
-                    componentMask = cv2.bitwise_not(componentMask)
+            if all((Keep_area,Keep_w_h)):
+                componentMask = (labels == i).astype("uint8") * 255
+                componentMask = componentMask[y:(y+h),x:(x+w)]
+                componentMask = cv2.bitwise_not(componentMask)
                     
-                    img_temp = cv2.resize(componentMask, (100,100),interpolation=cv2.INTER_AREA)
+                img_temp = cv2.resize(componentMask, (100,100),interpolation=cv2.INTER_AREA)
                     
-                    img_data = np.expand_dims(img_temp,axis=-1)
-                    img_data = np.concatenate((img_data,img_data,img_data),axis= -1)
-                    img_data = np.expand_dims(img_data,axis=0)
-
-                    img_data = preprocess_input(img_data)
+                img_data = np.expand_dims(img_temp,axis=-1)
+                img_data = np.concatenate((img_data,img_data,img_data),axis= -1)
+                img_data = np.expand_dims(img_data,axis=0)
                 
-                    vecteur = model.predict(img_data)
+                vecteur = model.predict(img_data)
                     
-                    proba = vecteur[:,numero_du_symbole_reconnus]
+                proba = vecteur[:,numero_du_symbole_reconnus]
                     
-                    
-                    element.append({"x":x,"y":y,"w":w,"h":h,"d":proba})
+                element.append({"x":x,"y":y,"w":w,"h":h,"d":proba})
                     
             
+        proba_max = st.slider("Les éléments possèdant une probabilité supérieure a :", min_value=0.00, max_value=1.00, value=0.5, step=0.01)
             
-            proba_max = st.slider("Les éléments possèdant une distance inférieure a :", min_value=0.00, max_value=1.00, value=0.5, step=0.01)
-            
-            for i in range(len(element)):
-                if element[i]["d"] > proba_max:
-                    cv2.rectangle(array, (element[i]["x"], element[i]["y"]), (element[i]["x"] + element[i]["w"], element[i]["y"] + element[i]["h"]), col, 2)
+        for i in range(len(element)):
+            if element[i]["d"] > proba_max:
+                cv2.rectangle(array, (element[i]["x"], element[i]["y"]), (element[i]["x"] + element[i]["w"], element[i]["y"] + element[i]["h"]), col, 2)
                     
-            stock_cropped.empty()
-            array = cv2.resize(array, (1500,1000),interpolation=cv2.INTER_AREA)
-            st.image(array, caption='')
+        stock_cropped.empty()
+        array = cv2.resize(array, (1500,1000),interpolation=cv2.INTER_AREA)
+        st.image(array, caption='')
         
     if option_choice == "Traduction":
         array = np.array(cropped_img)
-        
-        
         pass
+    
     if save:
         cv2.imwrite("./results.png",array)
         st.write("Image enregistré dans le répertoire courant")
@@ -335,5 +335,4 @@ if img_file:
 
 else:
     st.write("Charger une image avant de commencer svp")
-
-    
+ 
