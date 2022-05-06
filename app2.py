@@ -199,23 +199,40 @@ if img_file:
                 return True
             return False
 
-        def superposition(elem1,elem2):
-            return
 
 
-    
-        # Fonction passant un manuel de codage.
+        def superposition(elem1,elem2,max_h,elem3 = None):
+            if not elem3 is None:
+                h = abs(elem3["y"] - (elem1["y"] + elem1["h"]))
+            else:
+                h = abs(elem2["y"] - (elem1["y"] + elem1["h"]))
+
+            if h < max_h:
+                return True
+            return False
+
         def encodage(liste_elem):
             result = ""
             it = 0
+            Q3_h = liste_elem["h"].quantile(0.75)  
             while it < (liste_elem.shape[0] - 2):
                 if juxtaposition(liste_elem.iloc[it],liste_elem.iloc[it + 1]):
                     result += ( "-" + str(liste_elem.iloc[it]["pred"]) + "*" + str(liste_elem.iloc[it + 1]["pred"]))
+                    it += 1
+                elif superposition(liste_elem.iloc[it],liste_elem.iloc[it+1],Q3_h,elem3 = liste_elem.iloc[it+2]):
+                    if juxtaposition(liste_elem.iloc[it +1],liste_elem.iloc[it + 2]):
+                        result += ("-" + str(liste_elem.iloc[it]["pred"]) + ":" + str(liste_elem.iloc[it + 1]["pred"]) + "*" + str(liste_elem.iloc[it + 2]["pred"]))
+                    else:
+                        result += ("-" + str(liste_elem.iloc[it]["pred"]) + ":" + str(liste_elem.iloc[it + 1]["pred"]) + ":" + str(liste_elem.iloc[it + 2]["pred"]))
+                    it += 2
+                elif superposition(liste_elem.iloc[it],liste_elem.iloc[it+1],Q3_h):
+                    result += ("-" + str(liste_elem.iloc[it]["pred"]) + ":" + str(liste_elem.iloc[it + 1]["pred"]))
                     it += 1
                 else:
                     result += ("-" + str(liste_elem.iloc[it]["pred"]))
                 it += 1
             return result
+
     
         encode = []
         for k in range(len(liste_colonne_elem)):
