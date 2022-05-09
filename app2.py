@@ -214,7 +214,7 @@ if img_file:
         def encodage(liste_elem):
             result = ""
             it = 0
-            Q3_h = liste_elem["h"].quantile(0.75)  
+            Q3_h = liste_elem["h"].quantile(0.65)  
             while it < (liste_elem.shape[0] - 2):
                 if juxtaposition(liste_elem.iloc[it],liste_elem.iloc[it + 1]):
                     result += ( "-" + str(liste_elem.iloc[it]["pred"]) + "*" + str(liste_elem.iloc[it + 1]["pred"]))
