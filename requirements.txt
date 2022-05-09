@@ -2,6 +2,9 @@ numpy
 pandas
 streamlit
 streamlit_cropper
+csv
+annotated_text
+streamlit_drawable_canvas
 opencv-python-headless
 tensorflow-cpu
 sklearn

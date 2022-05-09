@@ -1,13 +1,20 @@
+################ Application
+
+### Importation
 import streamlit as st
 from streamlit_cropper import st_cropper
 from PIL import Image
 import numpy as np
 import cv2
+import csv
 import pandas as pd
 import tensorflow as tf
 from sklearn.cluster import DBSCAN
 import pickle
+from annotated_text import annotated_text
+from streamlit_drawable_canvas import st_canvas
 
+### Chargement model et label
 def importation_model_et_label(repertoire):
     model = tf.keras.models.load_model(repertoire + '/model.hd5')
     labels = []
@@ -15,21 +22,30 @@ def importation_model_et_label(repertoire):
         labels = pickle.load(temp)
     return model,labels
 
-model,liste_h= importation_model_et_label("./model")
+model,liste_h = importation_model_et_label("./model")
 
 
+##### App
 st.set_page_config(page_title="Hyéroglyfes recognition and translation App",page_icon="⚕️",layout="centered",initial_sidebar_state="expanded")
 
 html_temp = """ 
-    <div style ="background-color:pink;padding:13px"> 
+    <div style ="background-color:#af81c2;padding:13px"> 
     <h1 style ="color:black;text-align:center;">Hyéroglyfes recognition and translation App</h1> 
     </div> 
     """
       
 st.markdown(html_temp, unsafe_allow_html = True) 
-st.subheader('Author')
+#st.subheader('Author')
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
+
+
+title_alignment ="""
+    <div style = "background-color:#b897c6">
+    <h1 style = "color:blac;text-align:center;">Option de paramétrage</h1>
+    </div>
+    """
+st.sidebar.markdown(title_alignment, unsafe_allow_html=True)
 
 # Upload an image and set some options for demo purposes
 img_file = st.sidebar.file_uploader(label='Charger une image içi ...', type=['png', 'jpg'])
@@ -39,7 +55,8 @@ aspect_dict = {"1:1": (1, 1),"16:9": (16, 9),"4:3": (4, 3),"2:3": (2, 3),"Libre"
 aspect_ratio = aspect_dict[aspect_choice]
 
 
-option_choice = st.sidebar.radio(label="Options", options=["Recherche des hyéroglyfes", "Décodage", "Traduction","Reconnaissance"])
+
+option_choice = st.sidebar.radio(label="Options", options=["Recherche des hyéroglyfes", "Décodage", "Traduction","Reconnaissance","Dessin"])
 
 
 save = st.sidebar.button('Sauver le résultat')
@@ -63,15 +80,20 @@ if img_file:
         array = np.array(cropped_img)
         stock_cropped.empty()
         try:
-            gray = cv2.cvtColor(array, cv2.COLOR_BGR2GRAY)
+            gray = cv2.cvtColor(array.copy(), cv2.COLOR_BGR2GRAY)
         except:
-            gray = array
-        thresh = cv2.threshold(gray, 0, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-              
+            gray = array.copy()
+        
+        #threshold = st.slider("tresh", min_value=0, max_value=255, value=127, step=1)
+        threshold = 0
+        thresh = cv2.threshold(gray,threshold, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+        
+        
         output = cv2.connectedComponentsWithStats(thresh, 4, cv2.CV_32S)
         (numLabels, _, stats, centroids) = output
-            
-            
+        
+        
+        
         for i in range(0, numLabels):
             x = stats[i, cv2.CC_STAT_LEFT]
             y = stats[i, cv2.CC_STAT_TOP]
@@ -345,10 +367,102 @@ if img_file:
         array = np.array(cropped_img)
         pass
     
+    
+    if option_choice == "Dessin":
+        pass
+    
     if save:
         cv2.imwrite("./results.png",array)
         st.write("Image enregistré dans le répertoire courant")
         st.sidebar.write("Image enregistré dans le répertoire courant")
+
+elif option_choice == "Traduction":
+    file = st.file_uploader("Importer un fichier texte au format manuel de codage",["csv","txt"])
+    path = "../" + file.name
+
+    f = open(path)
+    myReader = csv.reader(f)
+    for row in myReader:
+        st.write(row)
+    
+    
+    
+    annotated_text(
+    "This ",
+    ("is", "verb", "#8ef"),
+    " some ",
+    ("annotated", "adj", "#faa"),
+    ("text", "noun", "#afa"),
+    " for those of ",
+    ("you", "pronoun", "#fea"),
+    " who ",
+    ("like", "verb", "#8ef"),
+    " this sort of ",
+    ("thing", "noun", "#afa"),
+    "."
+    )
+    
+elif option_choice == "Dessin":
+    drawing_mode = st.sidebar.selectbox(
+            "Drawing tool:", ("point", "freedraw", "line", "rect", "circle", "transform")
+            )
+
+    stroke_width = st.sidebar.slider("Stroke width: ", 1, 25, 3)
+    if drawing_mode == 'point':
+        point_display_radius = st.sidebar.slider("Point display radius: ", 1, 25, 3)
+    stroke_color = st.sidebar.color_picker("Stroke color hex: ")
+    bg_color = st.sidebar.color_picker("Background color hex: ", "#eee")
+    bg_image = st.sidebar.file_uploader("Background image:", type=["png", "jpg"])
+
+    realtime_update = st.sidebar.checkbox("Update in realtime", True)
+
+    
+
+            # Create a canvas component
+    canvas_result = st_canvas(
+        fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
+        stroke_width=stroke_width,
+        stroke_color=stroke_color,
+        background_color=bg_color,
+        background_image=Image.open(bg_image) if bg_image else None,
+        update_streamlit=realtime_update,
+        height=150,
+        drawing_mode=drawing_mode,
+        point_display_radius=point_display_radius if drawing_mode == 'point' else 0,
+        key="canvas",
+        )
+
+        # Do something interesting with the image data and paths
+    if canvas_result.image_data is not None:
+        st.image(canvas_result.image_data)
+    if canvas_result.json_data is not None:
+        objects = pd.json_normalize(canvas_result.json_data["objects"]) # need to convert obj to str because PyArrow
+        for col in objects.select_dtypes(include=['object']).columns:
+            objects[col] = objects[col].astype("str")
+        st.dataframe(objects) 
+    
+    recherche = st.button("Recherche des symbole match")
+    
+    if recherche:
+        symbole = np.array(Image.fromarray(canvas_result.image_data,'RGBA').convert('L'))
+              
+        
+        img_data = cv2.resize(symbole, (100,100),interpolation=cv2.INTER_AREA)
+
+        img_data = np.expand_dims(img_data,axis=-1)
+        img_data = np.concatenate((img_data,img_data,img_data),axis= -1)
+        
+        print(img_data.shape)
+        img_data = np.expand_dims(img_data,axis=0)        
+        vecteur = model.predict(img_data)
+                
+        symbole_reconnus = liste_h[np.argmax(vecteur)]
+        probabilite = vecteur[:,np.argmax(vecteur)]
+        numero_du_symbole_reconnus = np.argmax(vecteur)
+        
+        
+        st.write("Ce symbole est par ordre de probabilité : " + str(symbole_reconnus))
+        
 
 else:
     st.write("Charger une image avant de commencer svp")
