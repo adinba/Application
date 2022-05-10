@@ -479,19 +479,19 @@ elif option_choice == "Dessin":
 
         with col1:
             st.header(symbole_reconnus[0] + " avec une probabilité de " + str(probabilite[0]))
-            st.image("https://static.streamlit.io/examples/cat.jpg")
+            name = "model/sample/elem_" + symbole_reconnus[0] + ".png"
+            st.image(Image.open(name))
 
         with col2:
             st.header(symbole_reconnus[1]+ " avec une probabilité de " + str(probabilite[1]))
-            st.image("https://static.streamlit.io/examples/dog.jpg")
+            name = "model/sample/elem_" + symbole_reconnus[1] + ".png"
+            st.image(Image.open(name))
 
         with col3:
             st.header(symbole_reconnus[2] + " avec une probabilité de " + str(probabilite[2]))
-            st.image("https://static.streamlit.io/examples/owl.jpg")
-        
-        
-        
-        
+            name = "model/sample/elem_" + symbole_reconnus[2] + ".png"
+            st.image(Image.open(name))
+
 
 else:
     st.write(messages[langue]["2"])
