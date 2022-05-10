@@ -378,29 +378,28 @@ if img_file:
 
 elif option_choice == "Traduction":
     file = st.file_uploader("Importer un fichier texte au format manuel de codage",["csv","txt"])
-    path = "../" + file.name
+    if file:
+        path = "../" + file.name
 
-    f = open(path)
-    myReader = csv.reader(f)
-    for row in myReader:
-        st.write(row)
-    
-    
-    
-    annotated_text(
-    "This ",
-    ("is", "verb", "#8ef"),
-    " some ",
-    ("annotated", "adj", "#faa"),
-    ("text", "noun", "#afa"),
-    " for those of ",
-    ("you", "pronoun", "#fea"),
-    " who ",
-    ("like", "verb", "#8ef"),
-    " this sort of ",
-    ("thing", "noun", "#afa"),
-    "."
-    )
+        f = open(path)
+        myReader = csv.reader(f)
+        for row in myReader:
+            st.write(row)
+
+        annotated_text(
+        "This ",
+        ("is", "verb", "#8ef"),
+        " some ",
+        ("annotated", "adj", "#faa"),
+        ("text", "noun", "#afa"),
+        " for those of ",
+        ("you", "pronoun", "#fea"),
+        " who ",
+        ("like", "verb", "#8ef"),
+        " this sort of ",
+        ("thing", "noun", "#afa"),
+        "."
+        )
     
 elif option_choice == "Dessin":
     drawing_mode = st.sidebar.selectbox(
