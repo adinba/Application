@@ -1,0 +1,14 @@
+{
+    "ESP": {"first message" : "test1",
+    	     "1" : "Cargar la imaga aqui",
+    	     "2" : ""
+    		 },
+    "FR" : {"first message" : "test2",
+    	     "1" : "Charger l'image içi",
+    	     "2" : "Charger une image avant de commencer svp"
+    		 },
+    "EN" : {"first message" : "test3",
+    	     "1" : "Charge the inage here",
+    	     "2" : "Please load an image before strating"}
+
+}

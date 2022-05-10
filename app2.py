@@ -6,13 +6,14 @@ from streamlit_cropper import st_cropper
 from PIL import Image
 import numpy as np
 import cv2
-import csv
+import heapq
 import pandas as pd
 import tensorflow as tf
 from sklearn.cluster import DBSCAN
 import pickle
 from annotated_text import annotated_text
 from streamlit_drawable_canvas import st_canvas
+import json
 
 ### Chargement model et label
 def importation_model_et_label(repertoire):
@@ -25,12 +26,27 @@ def importation_model_et_label(repertoire):
 model,liste_h = importation_model_et_label("./model")
 
 
+### Récupération du fichier json contenant les différentes langues
+fichier_json = open('./language.json', 'r', encoding="utf-8")
+
+with fichier_json as fichier:
+   messages = json.load(fichier)
+   
+
+
+### Par défault la langue est l'anglais
+langue = "EN"
+
+
 ##### App
-st.set_page_config(page_title="Hyéroglyfes recognition and translation App",page_icon="⚕️",layout="centered",initial_sidebar_state="expanded")
+st.set_page_config(page_title="App",page_icon="⚕️",layout="centered",initial_sidebar_state="expanded")
+
+langue = str(st.sidebar.selectbox("Choose a language", options=["EN","FR","ESP"]))
+
 
 html_temp = """ 
     <div style ="background-color:#af81c2;padding:13px"> 
-    <h1 style ="color:black;text-align:center;">Hyéroglyfes recognition and translation App</h1> 
+    <h1 style ="color:black;text-align:center;">Application</h1> 
     </div> 
     """
       
@@ -38,6 +54,7 @@ st.markdown(html_temp, unsafe_allow_html = True)
 #st.subheader('Author')
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
+
 
 
 title_alignment ="""
@@ -48,7 +65,7 @@ title_alignment ="""
 st.sidebar.markdown(title_alignment, unsafe_allow_html=True)
 
 # Upload an image and set some options for demo purposes
-img_file = st.sidebar.file_uploader(label='Charger une image içi ...', type=['png', 'jpg'])
+img_file = st.sidebar.file_uploader(label=messages[langue]["1"], type=['png', 'jpg'])
 box_color = st.sidebar.color_picker(label="Couleur des contours", value='#0000FF')
 aspect_choice = st.sidebar.selectbox(label="Ratio de la coupure", options=["1:1", "16:9", "4:3", "2:3", "Libre"])
 aspect_dict = {"1:1": (1, 1),"16:9": (16, 9),"4:3": (4, 3),"2:3": (2, 3),"Libre": None}
@@ -377,14 +394,11 @@ if img_file:
         st.sidebar.write("Image enregistré dans le répertoire courant")
 
 elif option_choice == "Traduction":
-    file = st.file_uploader("Importer un fichier texte au format manuel de codage",["csv","txt"])
+    file = st.file_uploader("Importer un fichier texte au format manuel de codage",["csv","txt","png"])
     if file:
-        path = "../" + file.name
-
-        f = open(path)
-        myReader = csv.reader(f)
-        for row in myReader:
-            st.write(row)
+        df = pd.DataFrame(file)
+        for i in range(df.shape[0]):
+            annotated_text(str(df.iloc[i,].values))
 
         annotated_text(
         "This ",
@@ -451,18 +465,34 @@ elif option_choice == "Dessin":
         img_data = np.expand_dims(img_data,axis=-1)
         img_data = np.concatenate((img_data,img_data,img_data),axis= -1)
         
-        print(img_data.shape)
         img_data = np.expand_dims(img_data,axis=0)        
-        vecteur = model.predict(img_data)
+        vecteur = model.predict(img_data)[0]
+        print(np.round(vecteur,1))        
+        indice_top3 = heapq.nlargest(3, range(len(vecteur)), vecteur.take)
+
+        symbole_reconnus = np.array(liste_h)[indice_top3]
+        probabilite = np.round(vecteur[indice_top3],decimals = 2)
+        
                 
-        symbole_reconnus = liste_h[np.argmax(vecteur)]
-        probabilite = vecteur[:,np.argmax(vecteur)]
-        numero_du_symbole_reconnus = np.argmax(vecteur)
+        st.write("Ce symbole est reconnus comme : ")
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.header(symbole_reconnus[0] + " avec une probabilité de " + str(probabilite[0]))
+            st.image("https://static.streamlit.io/examples/cat.jpg")
+
+        with col2:
+            st.header(symbole_reconnus[1]+ " avec une probabilité de " + str(probabilite[1]))
+            st.image("https://static.streamlit.io/examples/dog.jpg")
+
+        with col3:
+            st.header(symbole_reconnus[2] + " avec une probabilité de " + str(probabilite[2]))
+            st.image("https://static.streamlit.io/examples/owl.jpg")
         
         
-        st.write("Ce symbole est par ordre de probabilité : " + str(symbole_reconnus))
+        
         
 
 else:
-    st.write("Charger une image avant de commencer svp")
+    st.write(messages[langue]["2"])
  
