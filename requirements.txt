@@ -3,6 +3,7 @@ pandas
 streamlit
 streamlit_cropper
 streamlit_drawable_canvas
+htbuilder
 opencv-python-headless
 tensorflow-cpu
 sklearn
