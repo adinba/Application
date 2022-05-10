@@ -8,5 +8,4 @@ opencv-python-headless
 tensorflow-cpu
 sklearn
 keras
-io
 base64
