@@ -2,7 +2,7 @@ numpy
 pandas
 streamlit
 streamlit_cropper
-streamlit_drawable_canvas
+streamlit-drawable-canvas
 htbuilder
 opencv-python-headless
 tensorflow-cpu
