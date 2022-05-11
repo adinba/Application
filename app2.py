@@ -510,7 +510,7 @@ else:
         
         thresh = cv2.bitwise_not(thresh)
      
-        output = cv2.connectedComponentsWithStats(thresh, 180, cv2.CV_32S)
+        output = cv2.connectedComponentsWithStats(thresh, 253, cv2.CV_32S)
         (numLabels, _, stats, centroids) = output
             
         for i in range(0, numLabels):
