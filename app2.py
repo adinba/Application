@@ -500,8 +500,36 @@ else:
 
     if img_file_buffer is not None:
         img = Image.open(img_file_buffer)
-
         img_array = np.array(img)
+        
+        try:
+            gray = cv2.cvtColor(array, cv2.COLOR_BGR2GRAY)
+        except:
+            gray = array
+        thresh = cv2.threshold(gray, 0, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+              
+        output = cv2.connectedComponentsWithStats(thresh, 4, cv2.CV_32S)
+        (numLabels, _, stats, centroids) = output
+        
+        for i in range(0, numLabels):
+            x = stats[i, cv2.CC_STAT_LEFT]
+            y = stats[i, cv2.CC_STAT_TOP]
+            w = stats[i, cv2.CC_STAT_WIDTH]
+            h = stats[i, cv2.CC_STAT_HEIGHT]
+            area = stats[i, cv2.CC_STAT_AREA]
 
-        st.image(img_array)
+            Keep_area = area < 30000 and area > 10
+            Keep_w_h = w <80 and h <80 and w > 3 and h> 3
+                
  
+            if all((Keep_area,Keep_w_h)):
+                cv2.rectangle(img_array, (x,y), (x+w, y+h), col, 2)
+
+        
+        
+        
+        st.image(img_array)
+        
+        
+        
+        
