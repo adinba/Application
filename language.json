@@ -1,14 +1,23 @@
 {
     "ESP": {"first message" : "test1",
+    	     "language_choice" : "----------",
+    	     "countours" : "----------",
+    	     "ratio" : "----------",
     	     "1" : "Cargar la imaga aqui",
     	     "2" : ""
     		 },
     "FR" : {"first message" : "test2",
     	     "1" : "Charger l'image içi",
+    	     "language_choice" : "Choissisez une langue",
+    	     "countours" : "Couleurs des contours",
+    	     "ratio" : "Ratio de la coupure",
     	     "2" : "Charger une image avant de commencer svp"
     		 },
     "EN" : {"first message" : "test3",
     	     "1" : "Charge the inage here",
+    	     "language_choice" : "Choose a language",
+    	     "countours" : "Color of the countours",
+    	     "ratio" : "Aspect ratio of the box",
     	     "2" : "Please load an image before strating"}
 
 }

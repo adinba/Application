@@ -41,7 +41,7 @@ langue = "EN"
 ##### App
 st.set_page_config(page_title="App",page_icon="⚕️",layout="centered",initial_sidebar_state="expanded")
 
-langue = str(st.sidebar.selectbox("Choose a language", options=["EN","FR","ESP"]))
+langue = str(st.sidebar.selectbox(messages[langue]["language_choice"], options=["EN","FR","ESP"]))
 
 
 html_temp = """ 
@@ -66,8 +66,8 @@ st.sidebar.markdown(title_alignment, unsafe_allow_html=True)
 
 # Upload an image and set some options for demo purposes
 img_file = st.sidebar.file_uploader(label=messages[langue]["1"], type=['png', 'jpg'])
-box_color = st.sidebar.color_picker(label="Couleur des contours", value='#0000FF')
-aspect_choice = st.sidebar.selectbox(label="Ratio de la coupure", options=["1:1", "16:9", "4:3", "2:3", "Libre"])
+box_color = st.sidebar.color_picker(label=messages[langue]["countours"], value='#0000FF')
+aspect_choice = st.sidebar.selectbox(label=messages[langue]["ratio"], options=["1:1", "16:9", "4:3", "2:3", "Libre"])
 aspect_dict = {"1:1": (1, 1),"16:9": (16, 9),"4:3": (4, 3),"2:3": (2, 3),"Libre": None}
 aspect_ratio = aspect_dict[aspect_choice]
 
@@ -467,7 +467,7 @@ elif option_choice == "Dessin":
         
         img_data = np.expand_dims(img_data,axis=0)        
         vecteur = model.predict(img_data)[0]
-        print(np.round(vecteur,1))        
+        
         indice_top3 = heapq.nlargest(3, range(len(vecteur)), vecteur.take)
 
         symbole_reconnus = np.array(liste_h)[indice_top3]
