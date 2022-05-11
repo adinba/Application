@@ -520,12 +520,12 @@ else:
             h = stats[i, cv2.CC_STAT_HEIGHT]
             area = stats[i, cv2.CC_STAT_AREA]
 
-            Keep_area = area < 30000 and area > 10
-            Keep_w_h = w <80 and h <80 and w > 3 and h> 3
-                
- 
-            if all((Keep_area,Keep_w_h)):
-                cv2.rectangle(img_array, (x,y), (x+w, y+h), (255,0,0), 2)
+#            Keep_area = area < 30000 and area > 10
+#            Keep_w_h = w <80 and h <80 and w > 3 and h> 3
+#                
+# 
+#            if all((Keep_area,Keep_w_h)):
+            cv2.rectangle(img_array, (x,y), (x+w, y+h), (255,0,0), 2)
 
         
         
