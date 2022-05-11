@@ -33,7 +33,6 @@ with fichier_json as fichier:
    messages = json.load(fichier)
    
 
-
 ### Par défault la langue est l'anglais
 langue = "EN"
 
@@ -42,7 +41,6 @@ langue = "EN"
 st.set_page_config(page_title="App", page_icon="⚕️", layout="centered", initial_sidebar_state="expanded")
 
 logo = st.sidebar.image(cv2.resize(np.array(Image.open("images/logo.png")),(80,100)))
-
 
 html_temp = """ 
     <img src="images/logo.png" alt = "LOGO"> 
@@ -63,8 +61,6 @@ st.markdown(html_temp, unsafe_allow_html = True)
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
 
-
-
 title_alignment ="""
     <div style = "background-color:#b897c6">
     <h1 style = "color:blac;text-align:center;">Option de paramétrage</h1>
@@ -72,23 +68,17 @@ title_alignment ="""
     """
 st.sidebar.markdown(title_alignment, unsafe_allow_html=True)
 
-
-
-
-# Upload an image and set some options for demo purposes
 img_file = st.sidebar.file_uploader(label=messages[langue]["1"], type=['png', 'jpg'])
 box_color = st.sidebar.color_picker(label=messages[langue]["countours"], value='#0000FF')
 aspect_choice = st.sidebar.selectbox(label=messages[langue]["ratio"], options=["1:1", "16:9", "4:3", "2:3", "Libre"])
 aspect_dict = {"1:1": (1, 1),"16:9": (16, 9),"4:3": (4, 3),"2:3": (2, 3),"Libre": None}
 aspect_ratio = aspect_dict[aspect_choice]
 
-
-
 option_choice = st.sidebar.radio(label="Options", options=["Recherche des hyéroglyfes", "Décodage", "Traduction","Reconnaissance","Dessin"])
-
 
 save = st.sidebar.button('Sauver le résultat')
 
+### Couleur hexadécimale en RGB
 def hex_to_rgb(value):
     value = value.lstrip('#')
     lv = len(value)
@@ -112,14 +102,10 @@ if img_file:
         except:
             gray = array.copy()
         
-        #threshold = st.slider("tresh", min_value=0, max_value=255, value=127, step=1)
-        threshold = 0
-        thresh = cv2.threshold(gray,threshold, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-        
+        thresh = cv2.threshold(gray,0, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
         
         output = cv2.connectedComponentsWithStats(thresh, 4, cv2.CV_32S)
         (numLabels, _, stats, centroids) = output
-        
         
         
         for i in range(0, numLabels):
@@ -132,9 +118,7 @@ if img_file:
                 
             Keep_area = area < 30000 and area > 10
             Keep_w_h = w <80 and h <80 and w > 3 and h> 3
-                
-                    
-                    
+                        
             if all((Keep_area,Keep_w_h)):
                 cv2.rectangle(array, (x, y), (x + w, y + h), col, 2)
                 
@@ -478,7 +462,7 @@ elif option_choice == "Dessin":
               
         
         img_data = cv2.resize(symbole, (100,100),interpolation=cv2.INTER_AREA)
-
+        print(img_data.shape)
         img_data = np.expand_dims(img_data,axis=-1)
         img_data = np.concatenate((img_data,img_data,img_data),axis= -1)
         
@@ -509,7 +493,15 @@ elif option_choice == "Dessin":
             name = "model/sample/elem_" + symbole_reconnus[2] + ".png"
             st.image(Image.open(name))
 
-
 else:
     st.write(messages[langue]["2"])
+
+    img_file_buffer = st.camera_input("Take a picture")
+
+    if img_file_buffer is not None:
+        # To read image file buffer as bytes:
+        bytes_data = img_file_buffer.getvalue()
+        # Check the type of bytes_data:
+        # Should output: <class 'bytes'>
+        st.write(type(bytes_data))
  
