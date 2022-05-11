@@ -1,10 +1,10 @@
 {
     "ESP": {"first message" : "test1",
-    	     "language_choice" : "----------",
-    	     "countours" : "----------",
-    	     "ratio" : "----------",
-    	     "1" : "Cargar la imaga aqui",
-    	     "2" : ""
+    	     "language_choice" : "Elegir el idioma",
+    	     "countours" : "Color del contorno",
+    	     "ratio" : "Ratio de la caja",
+    	     "1" : "Cargar la imagen aquí",
+    	     "2" : "Por favor cargue una imagen para comenzar"
     		 },
     "FR" : {"first message" : "test2",
     	     "1" : "Charger l'image içi",

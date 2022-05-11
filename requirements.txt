@@ -2,6 +2,7 @@ numpy
 pandas
 streamlit
 streamlit_cropper
+streamlit-aggrid
 htbuilder
 opencv-python-headless
 tensorflow-cpu

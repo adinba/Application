@@ -19,7 +19,7 @@ import json
 def importation_model_et_label(repertoire):
     model = tf.keras.models.load_model(repertoire + '/model.hd5')
     labels = []
-    with open (repertoire + '/labels', 'rb') as temp:
+    with open(repertoire + '/labels', 'rb') as temp:
         labels = pickle.load(temp)
     return model,labels
 
@@ -39,14 +39,17 @@ langue = "EN"
 
 
 ##### App
-st.set_page_config(page_title="App",page_icon="⚕️",layout="centered",initial_sidebar_state="expanded")
+st.set_page_config(page_title="App", page_icon="⚕️", layout="centered", initial_sidebar_state="expanded")
+
+logo = st.sidebar.image(cv2.resize(np.array(Image.open("./logo.png")),(80,100)))
+
 
 langue = str(st.sidebar.selectbox(messages[langue]["language_choice"], options=["EN","FR","ESP"]))
 
 
 html_temp = """ 
     <div style ="background-color:#af81c2;padding:13px"> 
-    <h1 style ="color:black;text-align:center;">Application</h1> 
+    <h1 style ="color:black;text-align:center;">OCR-PT-CT</h1> 
     </div> 
     """
       
@@ -63,6 +66,9 @@ title_alignment ="""
     </div>
     """
 st.sidebar.markdown(title_alignment, unsafe_allow_html=True)
+
+
+
 
 # Upload an image and set some options for demo purposes
 img_file = st.sidebar.file_uploader(label=messages[langue]["1"], type=['png', 'jpg'])
@@ -253,11 +259,14 @@ if img_file:
         def encodage(liste_elem):
             result = ""
             it = 0
-            Q3_h = liste_elem["h"].quantile(0.65)  
+            Q3_h = liste_elem["h"].quantile(0.75)  
             while it < (liste_elem.shape[0] - 2):
-                if juxtaposition(liste_elem.iloc[it],liste_elem.iloc[it + 1]):
+                if juxtaposition(liste_elem.iloc[it],liste_elem.iloc[it+1]):
                     result += ( "-" + str(liste_elem.iloc[it]["pred"]) + "*" + str(liste_elem.iloc[it + 1]["pred"]))
                     it += 1
+                elif juxtaposition(liste_elem.iloc[it+1],liste_elem.iloc[it]) and juxtaposition(liste_elem.iloc[it+1],liste_elem.iloc[it+2]):
+                    result += ( "-" + "(" +str(liste_elem.iloc[it]["pred"]) + ":" + str(liste_elem.iloc[it + 2]["pred"]) + ")*" + str(liste_elem.iloc[it+1]["pred"]))
+                    it += 2
                 elif superposition(liste_elem.iloc[it],liste_elem.iloc[it+1],Q3_h,elem3 = liste_elem.iloc[it+2]):
                     if juxtaposition(liste_elem.iloc[it +1],liste_elem.iloc[it + 2]):
                         result += ("-" + str(liste_elem.iloc[it]["pred"]) + ":" + str(liste_elem.iloc[it + 1]["pred"]) + "*" + str(liste_elem.iloc[it + 2]["pred"]))
@@ -297,7 +306,10 @@ if img_file:
         message = st.write("Entrez un symbole")
         
         symbole = st.sidebar.selectbox(label="Liste des symboles", options=liste_h)
-
+        
+        st.sidebar.write("Le symbole " + symbole + " est le suivant !")
+        img_symbole_select = st.sidebar.image(Image.open("./model/sample/elem_" + symbole +".png"))
+        
         img_symbole = st.sidebar.file_uploader(label='Charger un symbole içi', type=['png', 'jpg'])
         
         if img_symbole:
