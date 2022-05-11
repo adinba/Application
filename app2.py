@@ -525,12 +525,14 @@ else:
                 
  
             if all((Keep_area,Keep_w_h)):
-                cv2.rectangle(img_array, (x,y), (x+w, y+h), col, 2)
+                cv2.rectangle(img_array, (x,y), (x+w, y+h), (255,0,0), 2)
 
         
         
         
         st.image(thresh)
+        st.image(img_array)
+        
         
         
         
