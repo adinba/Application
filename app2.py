@@ -528,7 +528,7 @@ else:
         
         
         
-        st.image(img_array)
+        st.image(thresh)
         
         
         
