@@ -503,9 +503,9 @@ else:
         img_array = np.array(img)
         
         try:
-            gray = cv2.cvtColor(array, cv2.COLOR_BGR2GRAY)
+            gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
         except:
-            gray = array
+            gray = img_array
         thresh = cv2.threshold(gray, 0, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
               
         output = cv2.connectedComponentsWithStats(thresh, 4, cv2.CV_32S)
