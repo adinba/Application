@@ -521,7 +521,7 @@ else:
             area = stats[i, cv2.CC_STAT_AREA]
 
             Keep_area = area < 30000 and area > 10
-            Keep_w_h = w <400 and h <400 and w > 20 and h> 20
+            Keep_w_h = w <800 and h <800 and w > 10 and h> 10
                 
  
             if all((Keep_area,Keep_w_h)):
