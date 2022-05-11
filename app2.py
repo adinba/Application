@@ -507,10 +507,12 @@ else:
         except:
             gray = img_array
         thresh = cv2.threshold(gray, 0, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-              
+        
+        thresh = cv2.bitwise_not(thresh)
+     
         output = cv2.connectedComponentsWithStats(thresh, 4, cv2.CV_32S)
         (numLabels, _, stats, centroids) = output
-        
+            
         for i in range(0, numLabels):
             x = stats[i, cv2.CC_STAT_LEFT]
             y = stats[i, cv2.CC_STAT_TOP]
