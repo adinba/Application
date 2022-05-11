@@ -41,8 +41,13 @@ langue = "EN"
 ##### App
 st.set_page_config(page_title="App", page_icon="⚕️", layout="centered", initial_sidebar_state="expanded")
 
-logo = st.sidebar.image(cv2.resize(np.array(Image.open("./logo.png")),(80,100)))
+logo = st.sidebar.image(cv2.resize(np.array(Image.open("images/logo.png")),(80,100)))
 
+
+html_temp = """ 
+    <img src="images/logo.png" alt = "LOGO"> 
+    """
+st.markdown(html_temp, unsafe_allow_html = True) 
 
 langue = str(st.sidebar.selectbox(messages[langue]["language_choice"], options=["EN","FR","ESP"]))
 
