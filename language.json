@@ -4,20 +4,36 @@
     	     "countours" : "Color del contorno",
     	     "ratio" : "Ratio de la caja",
     	     "1" : "Cargar la imagen aquí",
-    	     "2" : "Por favor cargue una imagen para comenzar"
+    	     "2" : "Por favor cargue una imagen para comenzar",
+    	     "option1" : "Buscar",
+    	     "option2" : "Decode",
+    	     "option3" : "Traduccíon",
+    	     "option4" : "Recognition",
+    	     "option5" : "Dessin"
     		 },
     "FR" : {"first message" : "test2",
     	     "1" : "Charger l'image içi",
     	     "language_choice" : "Choissisez une langue",
     	     "countours" : "Couleurs des contours",
     	     "ratio" : "Ratio de la coupure",
-    	     "2" : "Charger une image avant de commencer svp"
+    	     "2" : "Charger une image avant de commencer svp",
+    	     "option1" : "Recherche des hyéroglyfes",
+    	     "option2" : "Décodage",
+    	     "option3" : "Traduction",
+    	     "option4" : "Reconnaissance",
+    	     "option5" : "Dessin"
     		 },
     "EN" : {"first message" : "test3",
     	     "1" : "Charge the inage here",
     	     "language_choice" : "Choose a language",
     	     "countours" : "Color of the countours",
     	     "ratio" : "Aspect ratio of the box",
-    	     "2" : "Please load an image before strating"}
+    	     "2" : "Please load an image before strating",
+    	     "option1" : "Looking for glyf",
+    	     "option2" : "Decode",
+    	     "option3" : "Translate",
+    	     "option4" : "Recognition",
+    	     "option5" : "Drawing"
+    	     	}
 
 }
