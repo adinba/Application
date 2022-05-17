@@ -295,7 +295,7 @@ if img_file:
                 fichier.write(manuel_de_codage[k] + '\n.')
             fichier.close()  
             
-    if option_choice == messages[langue]["option3"]:
+    if option_choice == messages[langue]["option4"]:
         message = st.write("Entrez un symbole")
         
         symbole = st.sidebar.selectbox(label="Liste des symboles", options=liste_h)
