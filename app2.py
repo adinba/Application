@@ -74,7 +74,11 @@ aspect_choice = st.sidebar.selectbox(label=messages[langue]["ratio"], options=["
 aspect_dict = {"1:1": (1, 1),"16:9": (16, 9),"4:3": (4, 3),"2:3": (2, 3),"Libre": None}
 aspect_ratio = aspect_dict[aspect_choice]
 
-option_choice = st.sidebar.radio(label="Options", options=["Recherche des hyéroglyfes", "Décodage", "Traduction","Reconnaissance","Dessin"])
+option_choice = st.sidebar.radio(label="Options", options=[messages[langue]["option1"],
+                                                           messages[langue]["option2"],
+                                                           messages[langue]["option3"],
+                                                           messages[langue]["option4"],
+                                                           messages[langue]["option5"]])
 
 save = st.sidebar.button('Sauver le résultat')
 
@@ -94,7 +98,7 @@ if img_file:
     _ = cropped_img.thumbnail((1500,1500))
     stock_cropped = st.image(cropped_img)
     
-    if option_choice == "Recherche des hyéroglyfes":
+    if option_choice == messages[langue]["option1"]:
         array = np.array(cropped_img)
         stock_cropped.empty()
         try:
@@ -125,7 +129,7 @@ if img_file:
         array = cv2.resize(array, (1500,1000),interpolation=cv2.INTER_AREA)
         st.image(array, caption='')
     
-    if option_choice == "Décodage":
+    if option_choice == messages[langue]["option2"]:
         
         array = np.array(cropped_img)
         img = array.copy()
@@ -164,7 +168,7 @@ if img_file:
 
         # Clustering
         frame = np.array(frame)
-        db = DBSCAN(eps=20, min_samples=4).fit(frame)
+        db = DBSCAN(eps=15, min_samples=4).fit(frame)
         labels = db.labels_
 
         # Data frame résultant
@@ -291,7 +295,7 @@ if img_file:
                 fichier.write(manuel_de_codage[k] + '\n.')
             fichier.close()  
             
-    if option_choice == "Reconnaissance":
+    if option_choice == messages[langue]["option3"]:
         message = st.write("Entrez un symbole")
         
         symbole = st.sidebar.selectbox(label="Liste des symboles", options=liste_h)
@@ -381,12 +385,12 @@ if img_file:
         array = cv2.resize(array, (1500,1000),interpolation=cv2.INTER_AREA)
         st.image(array, caption='')
         
-    if option_choice == "Traduction":
+    if option_choice == messages[langue]["option4"]:
         array = np.array(cropped_img)
         pass
     
     
-    if option_choice == "Dessin":
+    if option_choice == messages[langue]["option5"]:
         pass
     
     if save:
@@ -394,7 +398,7 @@ if img_file:
         st.write("Image enregistré dans le répertoire courant")
         st.sidebar.write("Image enregistré dans le répertoire courant")
 
-elif option_choice == "Traduction":
+elif option_choice == messages[langue]["option4"]:
     file = st.file_uploader("Importer un fichier texte au format manuel de codage",["csv","txt","png"])
     if file:
         df = pd.DataFrame(file)
@@ -416,7 +420,7 @@ elif option_choice == "Traduction":
         "."
         )
     
-elif option_choice == "Dessin":
+elif option_choice == messages[langue]["option5"]:
     drawing_mode = st.sidebar.selectbox(
             "Drawing tool:", ("point", "freedraw", "line", "rect", "circle", "transform")
             )
