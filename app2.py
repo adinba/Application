@@ -513,47 +513,58 @@ else:
             gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
         except:
             gray = img_array
+            
+            
+        threshold = st.slider("Thresold", min_value=0, max_value=255, value=127, step=1)
+
+        
         thresh = cv2.threshold(gray, 0, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
         
         thresh = cv2.bitwise_not(thresh)
- 
-        output = cv2.connectedComponentsWithStats(thresh, 253, cv2.CV_32S)
-        (numLabels, _, stats, centroids) = output
-            
-        for i in range(0, numLabels):
-            x = stats[i, cv2.CC_STAT_LEFT]
-            y = stats[i, cv2.CC_STAT_TOP]
-            w = stats[i, cv2.CC_STAT_WIDTH]
-            h = stats[i, cv2.CC_STAT_HEIGHT]
-            area = stats[i, cv2.CC_STAT_AREA]
-
-            Keep_area = area < 30000 and area > 10
-            Keep_w_h = w <800 and h <800 and w > 10 and h> 10
-            
-#            print(thresh[x:x+w,y:y+h])  
-            
-            if all((Keep_area,Keep_w_h)):
-                temp = thresh[x:x+w,y:y+h]
+    
+        temp_thresh = st.image(thresh)
+        
+        launch = st.button("Lancer la recherche une fois le treshold réglé")
+    
+        if launch:
+            temp_thresh.empty()
+            output = cv2.connectedComponentsWithStats(thresh, 253, cv2.CV_32S)
+            (numLabels, _, stats, centroids) = output
                 
-                try :
-                    temp = cv2.resize(temp, (100,100),interpolation=cv2.INTER_AREA)
-                except: 
-                    next
+            for i in range(0, numLabels):
+                x = stats[i, cv2.CC_STAT_LEFT]
+                y = stats[i, cv2.CC_STAT_TOP]
+                w = stats[i, cv2.CC_STAT_WIDTH]
+                h = stats[i, cv2.CC_STAT_HEIGHT]
+                area = stats[i, cv2.CC_STAT_AREA]
+    
+                Keep_area = area < 30000 and area > 10
+                Keep_w_h = w <800 and h <800 and w > 10 and h> 10
                 
-                temp = np.expand_dims(temp,-1)
-                temp = np.concatenate((temp,temp,temp),axis = 2)
-                temp = np.expand_dims(temp,axis=0)
+    #            print(thresh[x:x+w,y:y+h])  
                 
-                if (sum(temp.shape) != 204):
-                    next
-                else:    
-                    vecteur = model.predict(temp)
-                    pred = liste_h[np.argmax(vecteur)]
+                if all((Keep_area,Keep_w_h)):
+                    temp = thresh[x:x+w,y:y+h]
                     
+                    try :
+                        temp = cv2.resize(temp, (100,100),interpolation=cv2.INTER_AREA)
+                    except: 
+                        next
                     
-                    cv2.rectangle(img_array, (x,y), (x+w, y+h), (255,0,0), 2)
-                    cv2.rectangle(thresh, (x,y), (x+w, y+h), (255,0,0), 2)
-                    cv2.putText(img_array,str(pred),(x + w, y + h),cv2.FONT_HERSHEY_TRIPLEX , 0.5,(255,0,0),thickness = 1)
+                    temp = np.expand_dims(temp,-1)
+                    temp = np.concatenate((temp,temp,temp),axis = 2)
+                    temp = np.expand_dims(temp,axis=0)
+                    
+                    if (sum(temp.shape) != 204):
+                        next
+                    else:    
+                        vecteur = model.predict(temp)
+                        pred = liste_h[np.argmax(vecteur)]
+                        
+                        
+                        cv2.rectangle(img_array, (x,y), (x+w, y+h), (255,0,0), 2)
+                        cv2.rectangle(thresh, (x,y), (x+w, y+h), (255,0,0), 2)
+                        cv2.putText(img_array,str(pred),(x + w, y + h),cv2.FONT_HERSHEY_TRIPLEX , 0.5,(255,0,0),thickness = 1)
         
         st.image(thresh)
         st.image(img_array)
