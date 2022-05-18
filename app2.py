@@ -505,6 +505,9 @@ else:
     if img_file_buffer is not None:
         img = Image.open(img_file_buffer)
         img_array = np.array(img)
+#        cv2.imwrite("./test.png",img_array)
+#        img = cv2.imread("./test.png")
+#        img_array = np.array(img)
         
         try:
             gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
@@ -513,7 +516,7 @@ else:
         thresh = cv2.threshold(gray, 0, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
         
         thresh = cv2.bitwise_not(thresh)
-     
+ 
         output = cv2.connectedComponentsWithStats(thresh, 253, cv2.CV_32S)
         (numLabels, _, stats, centroids) = output
             
@@ -526,14 +529,31 @@ else:
 
             Keep_area = area < 30000 and area > 10
             Keep_w_h = w <800 and h <800 and w > 10 and h> 10
-                
- 
+            
+#            print(thresh[x:x+w,y:y+h])  
+            
             if all((Keep_area,Keep_w_h)):
-                cv2.rectangle(img_array, (x,y), (x+w, y+h), (255,0,0), 2)
-                cv2.rectangle(thresh, (x,y), (x+w, y+h), (255,0,0), 2)
-
-        
-        
+                temp = thresh[x:x+w,y:y+h]
+                
+                try :
+                    temp = cv2.resize(temp, (100,100),interpolation=cv2.INTER_AREA)
+                except: 
+                    next
+                
+                temp = np.expand_dims(temp,-1)
+                temp = np.concatenate((temp,temp,temp),axis = 2)
+                temp = np.expand_dims(temp,axis=0)
+                
+                if (sum(temp.shape) != 204):
+                    next
+                else:    
+                    vecteur = model.predict(temp)
+                    pred = liste_h[np.argmax(vecteur)]
+                    
+                    
+                    cv2.rectangle(img_array, (x,y), (x+w, y+h), (255,0,0), 2)
+                    cv2.rectangle(thresh, (x,y), (x+w, y+h), (255,0,0), 2)
+                    cv2.putText(img_array,str(pred),(x + w, y + h),cv2.FONT_HERSHEY_TRIPLEX , 0.5,(255,0,0),thickness = 1)
         
         st.image(thresh)
         st.image(img_array)
