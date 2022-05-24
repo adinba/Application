@@ -272,6 +272,11 @@ if img_file:
                 else:
                     result += ("-" + str(liste_elem.iloc[it]["pred"]))
                 it += 1
+            
+            if(it < liste_elem.shape[0]):
+                result += ( "-" + str(liste_elem.iloc[it]["pred"]))
+
+            
             return result
 
     
@@ -385,7 +390,7 @@ if img_file:
         array = cv2.resize(array, (1500,1000),interpolation=cv2.INTER_AREA)
         st.image(array, caption='')
         
-    if option_choice == messages[langue]["option4"]:
+    if option_choice == messages[langue]["option3"]:
         array = np.array(cropped_img)
         pass
     
@@ -398,7 +403,7 @@ if img_file:
         st.write("Image enregistré dans le répertoire courant")
         st.sidebar.write("Image enregistré dans le répertoire courant")
 
-elif option_choice == messages[langue]["option4"]:
+elif option_choice == messages[langue]["option3"]:
     file = st.file_uploader("Importer un fichier texte au format manuel de codage",["csv","txt","png"])
     if file:
         df = pd.DataFrame(file)
@@ -505,9 +510,6 @@ else:
     if img_file_buffer is not None:
         img = Image.open(img_file_buffer)
         img_array = np.array(img)
-#        cv2.imwrite("./test.png",img_array)
-#        img = cv2.imread("./test.png")
-#        img_array = np.array(img)
         
         try:
             gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
@@ -541,7 +543,6 @@ else:
                 Keep_area = area < 30000 and area > 10
                 Keep_w_h = w <800 and h <800 and w > 10 and h> 10
                 
-    #            print(thresh[x:x+w,y:y+h])  
                 
                 if all((Keep_area,Keep_w_h)):
                     temp = thresh[x:x+w,y:y+h]
@@ -566,8 +567,8 @@ else:
                         cv2.rectangle(thresh, (x,y), (x+w, y+h), (255,0,0), 2)
                         cv2.putText(img_array,str(pred),(x + w, y + h),cv2.FONT_HERSHEY_TRIPLEX , 0.5,(255,0,0),thickness = 1)
         
-        st.image(thresh)
-        st.image(img_array)
+            st.image(thresh)
+            st.image(img_array)
         
         
         
