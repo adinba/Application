@@ -24,7 +24,7 @@ def importation_model_et_label(repertoire):
     labels = []
     with open(repertoire + '/labels', 'rb') as temp:
         labels = pickle.load(temp)
-    labels = list(labels.values())
+    labels = list(labels)
     return model,labels
 
 model,liste_h = importation_model_et_label("./model")
