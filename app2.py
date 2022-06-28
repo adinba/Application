@@ -18,7 +18,7 @@ from streamlit_drawable_canvas import st_canvas
 import json
 import string
 
-### Loading model and label from repertory ------
+#### Loading model and label from repertory ------
 def importation_model_et_label(repertoire):
     model = tf.keras.models.load_model(repertoire + '/model.hd5')
     labels = []
